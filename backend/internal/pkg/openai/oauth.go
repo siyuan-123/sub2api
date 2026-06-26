@@ -26,6 +26,7 @@ const (
 	// requests on the same first-party-looking version/UA shape.
 	CodexCLIUserAgentVersion = "0.130.0"
 	CodexCLIUserAgent        = "codex_cli_rs/0.130.0 (Ubuntu 22.4.0; x86_64) xterm-256color"
+	CodexTUIUserAgent        = "codex-tui/0.130.0 (Ubuntu 22.4.0; x86_64) xterm-256color (codex-tui; 0.130.0)"
 
 	// Default redirect URI (can be customized)
 	DefaultRedirectURI = "http://localhost:1455/auth/callback"

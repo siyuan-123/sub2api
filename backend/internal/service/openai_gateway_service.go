@@ -73,14 +73,12 @@ const (
 var openaiAllowedHeaders = map[string]bool{
 	"accept-language":                       true,
 	"content-type":                          true,
-	"conversation_id":                       true,
 	"user-agent":                            true,
 	"originator":                            true,
 	"session_id":                            true,
 	"x-client-request-id":                   true,
 	"x-codex-beta-features":                 true,
 	"x-codex-inference-call-id":             true,
-	"x-codex-installation-id":               true,
 	"x-codex-parent-thread-id":              true,
 	"x-codex-turn-state":                    true,
 	"x-codex-turn-metadata":                 true,
@@ -96,7 +94,6 @@ var openaiPassthroughAllowedHeaders = map[string]bool{
 	"accept":                                true,
 	"accept-language":                       true,
 	"content-type":                          true,
-	"conversation_id":                       true,
 	"openai-beta":                           true,
 	"user-agent":                            true,
 	"originator":                            true,
@@ -104,7 +101,6 @@ var openaiPassthroughAllowedHeaders = map[string]bool{
 	"x-client-request-id":                   true,
 	"x-codex-beta-features":                 true,
 	"x-codex-inference-call-id":             true,
-	"x-codex-installation-id":               true,
 	"x-codex-parent-thread-id":              true,
 	"x-codex-turn-state":                    true,
 	"x-codex-turn-metadata":                 true,
@@ -3631,9 +3627,6 @@ func (s *OpenAIGatewayService) buildUpstreamRequestOpenAIPassthrough(
 		} else if req.Header.Get("accept") == "" {
 			req.Header.Set("accept", "text/event-stream")
 		}
-		if req.Header.Get("OpenAI-Beta") == "" {
-			req.Header.Set("OpenAI-Beta", "responses=experimental")
-		}
 		req.Header.Set("originator", resolveOpenAIUpstreamOriginator(c, true))
 		// 用隔离后的 session 标识符覆盖客户端透传值，防止跨用户会话碰撞。
 		if clientSessionID == "" {
@@ -4390,10 +4383,8 @@ func (s *OpenAIGatewayService) buildUpstreamRequest(ctx context.Context, c *gin.
 		req.Header.Del("session_id")
 
 		if compatMessagesBridge {
-			req.Header.Del("OpenAI-Beta")
 			req.Header.Del("originator")
 		} else {
-			req.Header.Set("OpenAI-Beta", "responses=experimental")
 			req.Header.Set("originator", resolveOpenAIUpstreamOriginator(c, isCodexCLI))
 		}
 		apiKeyID := getAPIKeyIDFromContext(c)

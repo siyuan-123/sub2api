@@ -360,9 +360,10 @@ func openAIAPIKeyExchangeSubjectTokens(tokenInfo *OpenAITokenInfo) []string {
 		}
 		subjects = append(subjects, token)
 	}
-	// 对齐 Codex-Manager：导入/刷新场景优先用 access_token，随后用 id_token 兜底。
-	add(tokenInfo.AccessToken)
+	// 对齐 Codex-Manager：requested_token=openai-api-key 的 subject_token_type
+	// 是 id_token，因此优先使用 id_token，access_token 仅作旧数据/异常响应兜底。
 	add(tokenInfo.IDToken)
+	add(tokenInfo.AccessToken)
 	return subjects
 }
 

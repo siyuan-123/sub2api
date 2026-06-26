@@ -1053,12 +1053,16 @@ func ensureCodexReasoningInclude(reqBody map[string]any) bool {
 }
 
 // applyCodexClientMetadata 在请求体补齐 client_metadata["x-codex-installation-id"]，
-// 取值为账号真实的 openai_device_id（最新 Codex 在请求体携带的安装标识）。
+// 取值优先使用账号真实的 openai_device_id；缺失时使用服务端持久化 installation_id，
+// 对齐 Codex-Manager 的稳定安装标识行为。
 //
-// 加法式、幂等：仅在账号存在 device_id 且该键缺失时注入，绝不覆盖既有 client_metadata
-// （如 turn metadata），也不伪造——无 device_id 时不写入。
+// 加法式、幂等：仅在该键缺失时注入，绝不覆盖既有 client_metadata（如 turn metadata）。
 func applyCodexClientMetadata(reqBody map[string]any, account *Account) bool {
-	return applyCodexClientMetadataWithInstallationID(reqBody, openAICodexInstallationIDFromAccount(account))
+	installationID := openAICodexInstallationIDFromAccount(account)
+	if installationID == "" {
+		installationID = resolveOpenAICodexPersistedInstallationID()
+	}
+	return applyCodexClientMetadataWithInstallationID(reqBody, installationID)
 }
 
 func applyCodexClientMetadataWithInstallationID(reqBody map[string]any, installationID string) bool {

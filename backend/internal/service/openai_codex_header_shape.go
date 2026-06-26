@@ -38,6 +38,9 @@ func applyOpenAICodexHeaderShape(req *http.Request, c *gin.Context, account *Acc
 		}
 	}
 
+	req.Header.Del(openAIHeaderConversationID)
+	req.Header.Del("OpenAI-Beta")
+	req.Header.Del("version")
 	// Codex-Manager 仅在 /compact 头部携带 x-codex-installation-id；
 	// 标准 /responses 通过 body.client_metadata 携带，避免 header/body 双写。
 	if isCompact {
@@ -91,10 +94,13 @@ func applyCodexClientMetadataToBodyJSON(body []byte, c *gin.Context, account *Ac
 }
 
 func resolveOpenAICodexInstallationID(c *gin.Context, account *Account) string {
+	if fromClient := getOpenAIIncomingHeader(c, openAIHeaderCodexInstallationID); fromClient != "" {
+		return fromClient
+	}
 	if fromAccount := openAICodexInstallationIDFromAccount(account); fromAccount != "" {
 		return fromAccount
 	}
-	return getOpenAIIncomingHeader(c, openAIHeaderCodexInstallationID)
+	return resolveOpenAICodexPersistedInstallationID()
 }
 
 func openAICodexInstallationIDFromAccount(account *Account) string {
