@@ -1058,11 +1058,12 @@ func ensureCodexReasoningInclude(reqBody map[string]any) bool {
 // 加法式、幂等：仅在账号存在 device_id 且该键缺失时注入，绝不覆盖既有 client_metadata
 // （如 turn metadata），也不伪造——无 device_id 时不写入。
 func applyCodexClientMetadata(reqBody map[string]any, account *Account) bool {
-	if account == nil {
-		return false
-	}
-	deviceID := strings.TrimSpace(account.GetOpenAIDeviceID())
-	if deviceID == "" {
+	return applyCodexClientMetadataWithInstallationID(reqBody, openAICodexInstallationIDFromAccount(account))
+}
+
+func applyCodexClientMetadataWithInstallationID(reqBody map[string]any, installationID string) bool {
+	installationID = strings.TrimSpace(installationID)
+	if installationID == "" {
 		return false
 	}
 	const key = "x-codex-installation-id"
@@ -1071,7 +1072,7 @@ func applyCodexClientMetadata(reqBody map[string]any, account *Account) bool {
 		if v, ok := existing[key].(string); ok && strings.TrimSpace(v) != "" {
 			return false
 		}
-		existing[key] = deviceID
+		existing[key] = installationID
 		reqBody["client_metadata"] = existing
 		return true
 	case map[string]string:
@@ -1082,11 +1083,11 @@ func applyCodexClientMetadata(reqBody map[string]any, account *Account) bool {
 		for k, v := range existing {
 			next[k] = v
 		}
-		next[key] = deviceID
+		next[key] = installationID
 		reqBody["client_metadata"] = next
 		return true
 	case nil:
-		reqBody["client_metadata"] = map[string]any{key: deviceID}
+		reqBody["client_metadata"] = map[string]any{key: installationID}
 		return true
 	default:
 		return false
