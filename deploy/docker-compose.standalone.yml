@@ -12,7 +12,7 @@
 
 services:
   sub2api:
-    image: weishaw/sub2api:latest
+    image: ghcr.io/siyuan-123/sub2api:latest
     container_name: sub2api
     restart: unless-stopped
     ulimits:
@@ -37,6 +37,7 @@ services:
       - SERVER_HOST=0.0.0.0
       - SERVER_PORT=8080
       - SERVER_MODE=${SERVER_MODE:-release}
+      - UPDATE_REPOSITORY=${UPDATE_REPOSITORY:-siyuan-123/sub2api}
       - RUN_MODE=${RUN_MODE:-standard}
 
       # =======================================================================
